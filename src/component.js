@@ -11,8 +11,8 @@ export class Component {
         this.worker = props.worker;
         this.created = props.created || function () { };
         this.destroyed = props.destroyed || function () { };
-        this.icon = props.iconname || "fa-wrench";
-        this.iconcolor = props.iconcolor || "deep-orange-9";
+        this.icon = props.iconname || 'fa-wrench';
+        this.iconcolor = props.iconcolor || 'deep-orange-9';
     }
 
     newNode() {
