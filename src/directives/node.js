@@ -75,6 +75,9 @@ export function Node(scope, el, expression, env) {
         'Remove node': () => {
             this.editor.removeNode(node);
         },
+        'Clone node': () => {
+            this.editor.cloneNode(node);
+        },
         'Add to group': () => {
             var group = new Group('Group', {nodes:[node]});
 

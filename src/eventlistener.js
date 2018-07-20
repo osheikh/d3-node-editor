@@ -2,7 +2,8 @@ export class EventListener {
 
     constructor() {
         this.events = {
-            nodecreate:[],
+            nodecreate: [],
+            clonenode: [],
             groupcreate: [],
             connectioncreate: [],
             noderemove:[],

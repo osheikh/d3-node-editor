@@ -1,6 +1,6 @@
 {
   "name": "d3-node-editor",
-  "version": "0.8.0",
+  "version": "0.10.6",
   "description": "JavaScript library",
   "main": "build/d3-node-editor.js",
   "types": "src/index.d.ts",
@@ -49,7 +49,7 @@
     "rollup-plugin-regenerator": "^0.5.4"
   },
   "publishConfig": {
-    "registry": "http://10.105.129.60:4873"
+    "registry": "http://npm.afiniti.com"
   },
   "dependencies": {
     "alight": "^0.14.1",

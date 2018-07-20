@@ -17,8 +17,8 @@ export class NodeEditor {
     constructor(id: string, container: HTMLElement, components: Component[], menu: ?ContextMenu) {
 
         if (!Utils.isValidId(id))
-            throw new Error('ID should be valid to name@0.1.0 format');  
-        
+            throw new Error('ID should be valid to name@0.1.0 format');
+
         this.id = id;
         this.components = components;
 
@@ -33,7 +33,7 @@ export class NodeEditor {
         this.eventListener = new EventListener();
         this.selected = new Selected();
         this.history = new History(this);
-        
+
         this.nodes = [];
         this.groups = [];
         this.readOnly = false;
@@ -46,7 +46,7 @@ export class NodeEditor {
             this.nodes.push(node);
             this.findComponent(node).created(node);
             this.eventListener.trigger('change');
-            
+
             this.history.add(this.addNode.bind(this),
                 this.removeNode.bind(this),
                 [node]);
@@ -58,17 +58,17 @@ export class NodeEditor {
             this.groups.push(group);
             this.eventListener.trigger('change');
         }
-        
+
         this.view.update();
     }
 
     removeNode(node: Node) {
-        var index = this.nodes.indexOf(node);
-
         if (this.eventListener.trigger('noderemove', node)) {
             node.getConnections().forEach(c => this.removeConnection(c));
 
-            this.nodes.splice(index, 1);
+            this.nodes = this.nodes.filter((n) => {
+                return n !== node;
+            })
             this.findComponent(node).destroyed(node);
             this.eventListener.trigger('change');
 
@@ -78,6 +78,19 @@ export class NodeEditor {
         }
 
         this.view.update();
+
+    }
+
+    cloneNode(node: Node) {
+        if (this.eventListener.trigger('clonenode', node)) {
+            var component = this.findComponent(node);
+            var nodeClone = component.builder(component.newNode());
+
+            nodeClone.position = JSON.parse(JSON.stringify(node.position));
+            nodeClone.position[1] += 50;
+            nodeClone.data = JSON.parse(JSON.stringify(node.data));
+            this.addNode(nodeClone);
+        }
     }
 
     removeGroup(group: Group) {
@@ -85,9 +98,9 @@ export class NodeEditor {
             group.remove();
             this.groups.splice(this.groups.indexOf(group), 1);
             this.eventListener.trigger('change');
-        }    
+        }
 
-        this.view.update(); 
+        this.view.update();
     }
 
     connect(output: Output | Connection, input: ?Input) {
@@ -108,7 +121,7 @@ export class NodeEditor {
                 this.eventListener.trigger('error', e);
             }
         }
-        this.view.update(); 
+        this.view.update();
     }
 
     removeConnection(connection: Connection) {
@@ -120,29 +133,29 @@ export class NodeEditor {
                 this.connect.bind(this),
                 [connection]);
         }
-        this.view.update(); 
+        this.view.update();
     }
 
     selectNode(node: Node, accumulate: boolean = false) {
         if (this.nodes.indexOf(node) === -1)
             throw new Error('Node not exist in list');
-        
+
         if (this.eventListener.trigger('nodeselect', node))
             this.selected.add(node, accumulate);
-        
+
         this.view.update();
     }
 
     selectGroup(group: Group, accumulate: boolean = false) {
         if (this.groups.indexOf(group) === -1)
             throw new Error('Group not exist in list');
-        
+
         if (this.eventListener.trigger('groupselect', group))
             this.selected.add(group, accumulate);
-        
+
         this.view.update();
     }
-    
+
     keyDown() {
         if (this.readOnly) return;
 
@@ -154,10 +167,10 @@ export class NodeEditor {
             break;
         case 71:
             let nodes = this.selected.getNodes();
-                
+
             if (nodes.length > 0)
                 this.addGroup(new Group('Group', { nodes }));
-            
+
             break;
         case 90:
             if (d3.event.ctrlKey && d3.event.shiftKey)
@@ -165,10 +178,10 @@ export class NodeEditor {
             else
             if (d3.event.ctrlKey)
                 this.history.undo();
-                
+
             break;
         default: break;
-            
+
         }
     }
 
@@ -203,12 +216,12 @@ export class NodeEditor {
 
     beforeImport(json: Object) {
         var checking = Utils.validate(this.id, json);
-        
+
         if (!checking.success) {
             this.eventListener.trigger('error', checking.msg);
             return false;
         }
-        
+
         this.eventListener.persistent = false;
         this.clear();
         return true;
@@ -232,11 +245,11 @@ export class NodeEditor {
                 nodes[id] = await Node.fromJSON(component, node);
                 this.addNode(nodes[id]);
             }));
-        
+
             Object.keys(json.nodes).forEach(id => {
                 var jsonNode = json.nodes[id];
                 var node = nodes[id];
-                
+
                 jsonNode.outputs.forEach((outputJson, i) => {
                     outputJson.connections.forEach(jsonConnection => {
                         var nodeId = jsonConnection.node;

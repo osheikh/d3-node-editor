@@ -29,7 +29,7 @@ export default {
             pugRuntime: false
         }),
         babel(),
-        regenerator(),
+        // regenerator(),
         minify({
             umd: {
                 dest: 'build/d3-node-editor.min.js',
